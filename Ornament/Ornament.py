@@ -1,38 +1,35 @@
-""" Ornament
-    The ornaments are ESP8266's
-    They connect to a web server
-        get time
-        get ID
-        get program
-        parse program
-    At appropriate start time
-        start program
-        run through commands
-
-"""
-
-import json
 from Light import Light
 from Wifi import Wifi
 from TimerHelper import TimerHelper
+from Globals import *
 
-STARTING = 0
-CONNECT = 1
-RUNNING = 2
-STOPPED = 3
-
-PROGRAM_FETCH = 98
-PROGRAM_END = 99
+DEBUG = False
 
 class Ornament:
     def __init__(self):
         self.light = Light(self)
-        self.wifi = Wifi() # all connection will 
+        self.wifi = Wifi() 
         self.timer = TimerHelper()
         self.keepGoing = True
         self.state = STARTING
 
-        self.program = [] # [next_time_interval, light_state]
+        self.program = [] # [next_time_interval, light_state, **[args]]
+        if DEBUG:
+            self.state = RUNNING
+            self.program = [
+                (0, LIGHT_OFF),
+                (500, LIGHT_ON, [WARM_WHITE]),
+                (500, LIGHT_OFF),
+                (500, LIGHT_ON, [WARM_WHITE]),
+                (2000, LIGHT_OFF),
+                (5000, RANDOM_FADE),
+                (10000, PULSE, [WARM_WHITE]),
+                (5000, RANDOM_FADE),
+                (5000, SINGLEPULSE, [WARM_WHITE]),
+                (5000, RANDOM_FADE),
+                (1000, PULSE, [WARM_WHITE]),
+                (0, 99)
+            ]
 
     def run(self):
         while self.keepGoing:
@@ -41,16 +38,22 @@ class Ornament:
 
             elif self.state == RUNNING:
                 if self.timer.check():
-                    nextTime, task = self.program.pop(0)
+                    nextTask = self.program.pop(0)
+                    nextTime = nextTask[0]
+                    task = nextTask[1]
+                    args = []
+                    if len(nextTask) == 3:
+                        args = nextTask[2]
+
                     if task == PROGRAM_END:
-                        self.state == STOPPED
+                        self.state = STOPPED
 
                     elif task == PROGRAM_FETCH:
                         self.state = STARTING
 
                     else:
                         self.timer.set(nextTime)
-                        self.light.setTask(task)
+                        self.light.setTask(task, args)
                 self.light.update()
                 self.light.draw()
             
