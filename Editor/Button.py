@@ -36,6 +36,4 @@ class Button(Element):
                     pygame.event.post(self.event)
 
     def draw(self, screen):
-        if self.rect.x == 25 and self.rect.y == 145:
-            print ("drawing")
         screen.blit(self.image, self.rect)

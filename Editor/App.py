@@ -12,6 +12,7 @@ from Globals import *
 from Panel import *
 from Button import *
 from Text import *
+from CursorManager import *
 
 # GUI elements
 """ 
@@ -42,8 +43,6 @@ class App:
         self.keepGoing = True
         self.clock = pygame.time.Clock()
 
-        # mp3 manager
-        self.mp3Manager = SoundFileManager()
 
         # GUI elements
         self.gui = RenderEvents()
@@ -51,6 +50,7 @@ class App:
         self.addOptionsPanel()
         self.addMp3Panel()
         self.addOrnamentPanel()
+        self.addCursorManager()
         
 
 
@@ -64,6 +64,9 @@ class App:
             for event in events:
                 if event.type == pygame.QUIT:
                     self.keepGoing = False
+                elif event.type == FULLDRAWEVENT:
+                    self.screen.blit(self.bg, (0,0))
+
 
             self.gui.events(events)
 
@@ -82,7 +85,7 @@ class App:
 
 
     def addOptionsPanel(self):
-        topLeftOptions = Panel((20,20), (200, 50))
+        topLeftOptions = Panel((20,20), (200, 70))
 
         newProgramEvent = pygame.event.Event(NEWPROGRAMEVENT)
         newProgramButton = Button("NEW PROGRAM", (25, 25), 14, newProgramEvent)
@@ -90,10 +93,14 @@ class App:
         loadMp3Event = pygame.event.Event(LOADMP3EVENT)
         loadMp3Button = Button("LOAD MP3", (25,45), 14, loadMp3Event)
         
+        saveProgramEvent = pygame.event.Event(SAVEPROGRAMEVENT)
+        saveProgramButton = Button("SAVE PROGRAM", (25,65), 14, saveProgramEvent)
+        
 
         self.gui.add(topLeftOptions)
-        self.gui.add(newProgramButton)
-        self.gui.add(loadMp3Button)
+        topLeftOptions.add(newProgramButton)
+        topLeftOptions.add(loadMp3Button)
+        topLeftOptions.add(saveProgramButton)
 
 
     def addMp3Panel(self):
@@ -102,18 +109,20 @@ class App:
         self.fileNameText = Text("UNTITLED PROGRAM", (400, 25), 14)
         self.mp3NameText = Text("MP3 FILENAME", (400, 45), 14)
 
-        soundManager = SoundFileManager()
+        fileNamePanel.add(self.fileNameText)
+        fileNamePanel.add(self.mp3NameText)
 
         self.gui.add(fileNamePanel)
-        self.gui.add(self.fileNameText)
-        self.gui.add(self.mp3NameText)
-        self.gui.add(soundManager)
+
 
     def addOrnamentPanel(self):
         ornamentPanel = OrnamentPanel((20, 140), (200, 500))
 
         self.gui.add(ornamentPanel)
 
+    def addCursorManager(self):
+        cursorManager = CursorManager()
+        self.gui.add(cursorManager)
 
 if __name__ == "__main__":
     app = App()

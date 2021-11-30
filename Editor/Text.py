@@ -14,3 +14,4 @@ class Text(Element):
         self.image = self.font.render(text, 1, TEXTCOLOR)
         self.rect = self.image.get_rect()
         self.rect.move_ip(position)
+        
